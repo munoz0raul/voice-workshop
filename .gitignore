@@ -1,0 +1,12 @@
+# Local originals and large files kept out of git.
+# _source/ holds the uncropped board photos, the original-named .eim, and the
+# ~100 MB dataset zip (the zip ships as a GitHub Release asset -- see
+# dataset/README.md).
+_source/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

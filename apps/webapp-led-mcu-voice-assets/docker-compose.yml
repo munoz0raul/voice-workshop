@@ -1,0 +1,15 @@
+services:
+  webapp-led-mcu-voice-assets:
+    image: demo-server.local/webapp-led-mcu-voice-assets:latest
+    entrypoint: ["/sbin/tini", "--", "/usr/local/bin/start.sh"]
+    restart: unless-stopped
+    # pid host: so it can restart the voice app's process when a new model
+    # lands. privileged + the /var/local mount: write the shared model volume.
+    pid: "host"
+    privileged: true
+    tty: true
+    stdin_open: true
+    volumes:
+      - /var/local:/saved
+    environment:
+      OUT_DIR: "/saved/assets"

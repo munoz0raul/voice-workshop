@@ -1,0 +1,36 @@
+# Voice -> LED colour demo, one command from the repo root:
+#
+#   docker compose up --build
+#   # then open http://localhost:8000 and say "select", then a colour
+#
+# This runs the voice app with the Edge Impulse model baked into its image.
+# It works on plain Debian (or any Linux with Docker) -- all it needs is a
+# microphone. The UNO Q / VENTUNO Q LED matrix and on-board LEDs are optional:
+# when the hardware is absent the app lights the colours in the web UI only.
+#
+# The model-delivery app (apps/webapp-led-mcu-voice-assets) is the on-device OTA
+# path and is intentionally NOT started here -- see its README.
+services:
+  voice:
+    build: ./apps/webapp-led-mcu-voice
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # Microphone: pass ALSA/PortAudio the host sound devices.
+    devices:
+      - "/dev/snd:/dev/snd"
+    group_add:
+      - "audio"
+    volumes:
+      # Persists the mic choice (device_config.json) across restarts.
+      - assets:/var/local/assets
+    environment:
+      THRESH: "0.70"
+      DEBOUNCE_SECONDS: "0.5"
+      SELECT_COOLDOWN_SECONDS: "1.0"
+      SELECT_SUPPRESS_SECONDS: "8.0"
+      # PA_ALSA_DEVICE unset -> default input device. If capture fails, pick a
+      # "recommended" device from the gear (⚙) menu in the web UI.
+
+volumes:
+  assets:

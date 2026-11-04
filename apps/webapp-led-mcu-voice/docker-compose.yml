@@ -1,0 +1,36 @@
+# Run the voice app on its own, from this directory:
+#
+#   docker compose up --build
+#   # then open http://localhost:8000
+#
+# Portable defaults: builds locally, maps port 8000, and passes the host sound
+# devices through. No privileged mode or host networking -- the UNO Q / VENTUNO Q
+# hardware (LED matrix, sysfs LEDs) is optional and skipped when absent.
+services:
+  webapp-led-mcu-voice:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # Microphone: pass ALSA/PortAudio the host sound devices.
+    devices:
+      - "/dev/snd:/dev/snd"
+    group_add:
+      - "audio"
+    volumes:
+      # Persists the mic choice (device_config.json) across restarts, and is
+      # where the assets app drops a new model on the fleet.
+      - assets:/var/local/assets
+    environment:
+      # Edge Impulse inference tuning.
+      THRESH: "0.70"
+      DEBOUNCE_SECONDS: "0.5"
+      SELECT_COOLDOWN_SECONDS: "1.0"
+      SELECT_SUPPRESS_SECONDS: "8.0"
+      # PA_ALSA_DEVICE is left unset so PortAudio uses the default input device.
+      # If capture fails ("Invalid sample rate"), open the gear (⚙) menu in the
+      # web UI and pick a device marked "recommended" (a default/plughw device
+      # that resamples to the model's 16 kHz).
+
+volumes:
+  assets:
